@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 
 /**
  * @author Green写代码
@@ -27,9 +28,34 @@ public class UserController {
     @Autowired
     private UserServiceImpl userService;
 
+    @Autowired
+
+    //拥有ThreadLocal的map让用户在每一个request处理自己的session等变量
+    private HttpServletRequest httpServletRequest;
+
     //用户获取opt短信接口
+    @RequestMapping("/getotp")
+    @ResponseBody
     public CommonReturnType getOpt(@RequestParam(value = "telephone")String phone){
-        
+        //按照一定规则生成OTP验证码
+        Random random = new Random();
+        int randomInt = random.nextInt(99999);
+        randomInt+=10000;
+        String optCode = String.valueOf(randomInt);
+
+        //将OTP验证码同对应用户的手机号关联
+        //暂时使用HttpSession方式绑定
+        httpServletRequest.getSession().setAttribute(phone, optCode);
+
+
+        //将OTP验证码通过短信验证码发送给用户手机号和OTPCODE
+        //此处省略, 我们直接打印,用户的敏感信息是不能打印到日志的, 企业中不能这样使用
+        System.out.println("telephone : " + phone + " optCode = " + optCode);
+
+
+        //TODO: 分布式项目中我们使用redis存储这一部分键值对
+
+        return CommonReturnType.create(null);
     }
 
 
