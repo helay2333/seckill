@@ -1,5 +1,6 @@
 package com.example.demo.service;
 
+import com.example.demo.error.BusinessException;
 import com.example.demo.model.UserModel;
 
 /**
@@ -8,4 +9,5 @@ import com.example.demo.model.UserModel;
  */
 public interface UserService {
     UserModel getUserById(Integer id);
+    void register(UserModel userModel) throws BusinessException;
 }

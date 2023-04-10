@@ -6,4 +6,5 @@ import org.apache.ibatis.annotations.Mapper;
 @Mapper
 public interface UserPasswordMapper {
     public UserPassword selectByUserId(Integer id);
+    public void insertPassword(UserPassword userPassword);
 }

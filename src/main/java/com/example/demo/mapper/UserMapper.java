@@ -10,4 +10,5 @@ import org.apache.ibatis.annotations.Mapper;
 @Mapper
 public interface UserMapper {
     public User getUserById(Integer id);
+    public void insertUser(User user);
 }

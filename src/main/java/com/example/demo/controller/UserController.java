@@ -1,6 +1,7 @@
 package com.example.demo.controller;
 
 import com.example.demo.controller.viewobjet.UserVo;
+import com.example.demo.entity.User;
 import com.example.demo.error.BusinessException;
 import com.example.demo.error.EmBusinessError;
 import com.example.demo.model.UserModel;
@@ -11,9 +12,14 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
+import sun.misc.BASE64Encoder;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.UnsupportedEncodingException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
@@ -24,6 +30,7 @@ import java.util.Random;
  */
 @RestController
 @RequestMapping("/user")
+@CrossOrigin//跨域处理
 public class UserController {
     @Autowired
     private UserServiceImpl userService;
@@ -32,6 +39,40 @@ public class UserController {
 
     //拥有ThreadLocal的map让用户在每一个request处理自己的session等变量
     private HttpServletRequest httpServletRequest;
+
+    //用户注册接口
+    public CommonReturnType register(@RequestParam(value = "telephone") String telephone,
+                                     @RequestParam(value = "otpCode")String otpCode,
+                                     @RequestParam(value = "name")String name,
+                                     @RequestParam(value = "gender") Integer gender,
+                                     @RequestParam(name="age")Integer age,
+                                     @RequestParam(name="password")String password) throws BusinessException, UnsupportedEncodingException, NoSuchAlgorithmException {
+        //验证otp和手机号码相符合
+        String inSessionCode = (String) this.httpServletRequest.getSession().getAttribute(telephone);
+        if(!otpCode.equals(inSessionCode)) {
+            throw new BusinessException(EmBusinessError.PARAMETER_VALIDATION_ERROR,"短信验证码不符合");
+        }
+        //进入注册流程
+        UserModel userModel = new UserModel();
+        userModel.setName(name);
+        userModel.setGender(new Byte(String.valueOf(gender.intValue())));
+        userModel.setAge(age);
+        userModel.setTelephone(telephone);
+        userModel.setRegisterMode("byphone");
+        userModel.setEncrptPassword(this.EncodeByMd5(password));
+        userService.register(userModel);
+        return CommonReturnType.create(null);
+
+    }
+    public String EncodeByMd5(String str) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+        //确定计算方法
+        MessageDigest md5 = MessageDigest.getInstance("MD5");
+        BASE64Encoder base64en = new BASE64Encoder();
+        //加密字符串
+        String newstr = base64en.encode(md5.digest(str.getBytes("utf-8")));
+        return newstr;
+    }
+
 
     //用户获取opt短信接口
     @RequestMapping("/getotp")
