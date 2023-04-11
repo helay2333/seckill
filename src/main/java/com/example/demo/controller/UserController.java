@@ -28,9 +28,13 @@ import java.util.Random;
  * @author Green写代码
  * @date 2023-03-18 18:06
  */
-@RestController
+@RestController("/user")
 @RequestMapping("/user")
-@CrossOrigin//跨域处理
+/*
+* allowCredentials属性:配置是否允许发送Cookie,用于凭证请求, 默认不发送cookie。 allowedHeaders属性:配置允许的自定义请求头,用于预检请求*/
+
+
+@CrossOrigin(originPatterns = "*", allowCredentials = "true")//跨域处理
 public class UserController {
     @Autowired
     private UserServiceImpl userService;
@@ -41,12 +45,15 @@ public class UserController {
     private HttpServletRequest httpServletRequest;
 
     //用户注册接口
+    @RequestMapping(value = "/register",method = {RequestMethod.POST})
+    @ResponseBody
     public CommonReturnType register(@RequestParam(value = "telephone") String telephone,
                                      @RequestParam(value = "otpCode")String otpCode,
                                      @RequestParam(value = "name")String name,
                                      @RequestParam(value = "gender") Integer gender,
                                      @RequestParam(name="age")Integer age,
                                      @RequestParam(name="password")String password) throws BusinessException, UnsupportedEncodingException, NoSuchAlgorithmException {
+        System.out.println(this.httpServletRequest.getSession());
         //验证otp和手机号码相符合
         String inSessionCode = (String) this.httpServletRequest.getSession().getAttribute(telephone);
         if(!otpCode.equals(inSessionCode)) {
@@ -87,9 +94,9 @@ public class UserController {
         //将OTP验证码同对应用户的手机号关联
         //暂时使用HttpSession方式绑定
         httpServletRequest.getSession().setAttribute(phone, optCode);
+        System.out.println(httpServletRequest.getSession().getAttribute(phone));
 
-
-        //将OTP验证码通过短信验证码发送给用户手机号和OTPCODE
+        //将OTP验证码通过短信验证码发送给用户手机号和OPTCODE
         //此处省略, 我们直接打印,用户的敏感信息是不能打印到日志的, 企业中不能这样使用
         System.out.println("telephone : " + phone + " optCode = " + optCode);
 

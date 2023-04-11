@@ -15,6 +15,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.DuplicateFormatFlagsException;
+
 /**
  * @author Green写代码
  * @date 2023-03-18 18:09
@@ -54,7 +56,12 @@ public class UserServiceImpl implements UserService {
 
         //实现mode -> dataObject
         User user = convertFromModel(userModel);
-        userMapper.insertUser(user);
+        //防止两个手机号一模一样的注册, 因为我们设置了不可重复键telephone
+        try{
+            userMapper.insertUser(user);
+        }catch (DuplicateFormatFlagsException exception){
+            throw new BusinessException(EmBusinessError.PARAMETER_VALIDATION_ERROR, "手机号已经重复注册")
+        ;}
 
         userModel.setId(user.getId());
         UserPassword userPassword = convertPasswordFromModel(userModel);
