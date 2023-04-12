@@ -11,4 +11,5 @@ import org.apache.ibatis.annotations.Mapper;
 public interface UserMapper {
     public User getUserById(Integer id);
     public void insertUser(User user);
+    public User selectByTelphone(String telephone);
 }

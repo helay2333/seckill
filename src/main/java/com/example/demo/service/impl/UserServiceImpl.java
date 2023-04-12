@@ -9,6 +9,8 @@ import com.example.demo.mapper.UserMapper;
 import com.example.demo.mapper.UserPasswordMapper;
 import com.example.demo.model.UserModel;
 import com.example.demo.service.UserService;
+import com.example.demo.validator.ValidataionResult;
+import com.example.demo.validator.ValidatorImpl;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,18 +42,27 @@ public class UserServiceImpl implements UserService {
         return converFromDataObject(user, userPassword);
     }
 
+    @Autowired
+    private ValidatorImpl validator;
+
+
+
     @Override
     @Transactional//处理事务
     public void register(UserModel userModel) throws BusinessException {
         if(userModel == null) {
             throw new BusinessException(EmBusinessError.PARAMETER_VALIDATION_ERROR);
         }
-        if (StringUtils.isEmpty(userModel.getName())
-            || userModel.getGender() == null
-            || userModel.getAge() == null
-            || StringUtils.isEmpty(userModel.getTelephone())
-        ) {
-            throw new BusinessException(EmBusinessError.PARAMETER_VALIDATION_ERROR);
+//        if (StringUtils.isEmpty(userModel.getName())
+//            || userModel.getGender() == null
+//            || userModel.getAge() == null
+//            || StringUtils.isEmpty(userModel.getTelephone())
+//        ) {
+//            throw new BusinessException(EmBusinessError.PARAMETER_VALIDATION_ERROR);
+//        }
+        ValidataionResult result = validator.validate(userModel);
+        if(result.isHasErrors()){
+            throw new BusinessException(EmBusinessError.PARAMETER_VALIDATION_ERROR,result.getErrMsg());
         }
 
         //实现mode -> dataObject
@@ -94,6 +105,35 @@ public class UserServiceImpl implements UserService {
             //保护
             userModel.setEncrptPassword(userPassword.getEncrptPassword());
         }
+        return userModel;
+    }
+
+    public UserModel validateLogin(String telephone, String encrptPassword) throws BusinessException {
+        //通过用户的手机获取用户信息
+        User userDO = userMapper.selectByTelphone(telephone);
+        if(userDO == null){
+            throw new BusinessException(EmBusinessError.USER_LOGIN_FAIL);
+        }
+        UserPassword userPasswordDO = userPasswordMapper.selectByUserId(userDO.getId());
+        UserModel userModel = convertFromDataObject(userDO,userPasswordDO);
+
+        //比对用户信息内加密的密码是否和传输进来的密码相匹配
+        if(!StringUtils.equals(encrptPassword,userModel.getEncrptPassword())){
+            throw new BusinessException(EmBusinessError.USER_LOGIN_FAIL);
+        }
+        return userModel;
+    }
+    private UserModel convertFromDataObject(User userDO, UserPassword userPasswordDO){
+        if(userDO == null){
+            return null;
+        }
+        UserModel userModel = new UserModel();
+        BeanUtils.copyProperties(userDO,userModel);
+
+        if(userPasswordDO != null){
+            userModel.setEncrptPassword(userPasswordDO.getEncrptPassword());
+        }
+
         return userModel;
     }
 }

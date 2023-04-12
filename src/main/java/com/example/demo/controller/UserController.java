@@ -16,7 +16,9 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import sun.misc.BASE64Encoder;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -43,6 +45,7 @@ public class UserController {
 
     //拥有ThreadLocal的map让用户在每一个request处理自己的session等变量
     private HttpServletRequest httpServletRequest;
+    private HttpServletResponse httpServletResponse;
 
     //用户注册接口
     @RequestMapping(value = "/register",method = {RequestMethod.POST})
@@ -55,9 +58,16 @@ public class UserController {
                                      @RequestParam(name="password")String password) throws BusinessException, UnsupportedEncodingException, NoSuchAlgorithmException {
         System.out.println(this.httpServletRequest.getSession());
         //验证otp和手机号码相符合
-        String inSessionCode = (String) this.httpServletRequest.getSession().getAttribute(telephone);
-        if(!otpCode.equals(inSessionCode)) {
-            throw new BusinessException(EmBusinessError.PARAMETER_VALIDATION_ERROR,"短信验证码不符合");
+//        String inSessionCode = (String) this.httpServletRequest.getSession().getAttribute(telephone);
+        Cookie[] inCookie = this.httpServletRequest.getCookies();
+        if(inCookie == null) return CommonReturnType.create(null);
+        for(Cookie cookie : inCookie){
+            if(telephone.equals(cookie.getName())){
+                String cookieValue = cookie.getValue();
+                if(!otpCode.equals(cookieValue)) {
+                    throw new BusinessException(EmBusinessError.PARAMETER_VALIDATION_ERROR,"短信验证码不符合");
+                }
+            }
         }
         //进入注册流程
         UserModel userModel = new UserModel();
@@ -82,9 +92,10 @@ public class UserController {
 
 
     //用户获取opt短信接口
+    @GetMapping("/set-cookie")
     @RequestMapping("/getotp")
     @ResponseBody
-    public CommonReturnType getOpt(@RequestParam(value = "telephone")String phone){
+    public CommonReturnType getOpt(@RequestParam(value = "telephone")String phone, HttpServletResponse httpServletResponse){
         //按照一定规则生成OTP验证码
         Random random = new Random();
         int randomInt = random.nextInt(99999);
@@ -94,6 +105,11 @@ public class UserController {
         //将OTP验证码同对应用户的手机号关联
         //暂时使用HttpSession方式绑定
         httpServletRequest.getSession().setAttribute(phone, optCode);
+        Cookie cookie = new Cookie(phone, optCode);
+        cookie.setDomain("");
+        cookie.setPath("/");
+        httpServletResponse.addCookie(cookie);
+
         System.out.println(httpServletRequest.getSession().getAttribute(phone));
 
         //将OTP验证码通过短信验证码发送给用户手机号和OPTCODE
@@ -152,9 +168,54 @@ public class UserController {
 
 
     }
+    @RequestMapping(value = "/login",method = {RequestMethod.POST})
+    public CommonReturnType login(@RequestParam(name="telephone")String telephone,
+                                  @RequestParam(name="password")String password) throws BusinessException, UnsupportedEncodingException, NoSuchAlgorithmException {
+        //入参校验
+        if(org.apache.commons.lang3.StringUtils.isEmpty(telephone)||
+                StringUtils.isEmpty(password)){
+            throw new BusinessException(EmBusinessError.PARAMETER_VALIDATION_ERROR);
+        }
+        //用户登录服务, 用来校验用户登录是否合法
+        UserModel userModel = userService.validateLogin(telephone,this.EncodeByMd5(password));
+
+
+        //将登陆凭证加入到用户登陆成功的session内
+        this.httpServletRequest.getSession().setAttribute("IS_LOGIN",true);
+        this.httpServletRequest.getSession().setAttribute("LOGIN_USER",userModel);
+
+        return CommonReturnType.create(null);
+    }
+
+
+
+
+
+
+
 
     @RequestMapping("/hello")
+
     public String hello(){
+
+        Cookie cookie=new Cookie("sessionId","CookieTestInfo");
+        this.httpServletResponse.addCookie(cookie);
         return "hello";
+    }
+    @RequestMapping("/getCookies")
+    public  String getCookies(HttpServletRequest request){
+        //HttpServletRequest 装请求信息类
+        //HttpServletRespionse 装相应信息的类
+        //   Cookie cookie=new Cookie("sessionId","CookieTestInfo");
+        Cookie[] cookies =  request.getCookies();
+        if(cookies != null){
+            for(Cookie cookie : cookies){
+                if(cookie.getName().equals("sessionId")){
+                    return cookie.getValue();
+                }
+            }
+        }
+
+        return  null;
     }
 }
