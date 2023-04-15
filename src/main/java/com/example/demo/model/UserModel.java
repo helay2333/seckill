@@ -31,7 +31,7 @@ public class UserModel {
     private String registerMode;
 
     private String thirdPartyId;
-    
+
     @NotBlank(message = "密码不能为空")
     private String encrptPassword;
 }

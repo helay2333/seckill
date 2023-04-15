@@ -5,6 +5,7 @@ import lombok.Data;
 /**
  * @author Green写代码
  * @date 2023-04-09 14:23
+ * 这是给前端的
  */
 @Data
 public class UserVo {
