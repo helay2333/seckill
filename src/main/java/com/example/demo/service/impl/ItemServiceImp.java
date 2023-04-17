@@ -21,11 +21,11 @@ public class ItemServiceImp implements ItemService {
 
     @Override
     @Transactional
-    public ItemModel createItem(ItemModel itemModel) {
+    public ItemModel createItem(ItemModel itemModel) throws BusinessException {
         //校验入参
         ValidataionResult validataionResult = validator.validate(itemModel);
         if(validataionResult.isHasErrors()) {
-            throw new BusinessException(EmBusinessError.PARAMETER_VALIDATION_ERROR,validataionResult.getErrMsg())
+            throw new BusinessException(EmBusinessError.PARAMETER_VALIDATION_ERROR,validataionResult.getErrMsg());
         }
         //转化itemmodel->dataobject;
 
