@@ -11,8 +11,9 @@ public enum EmBusinessError implements CommonError{
 
     //1开头的都是用户信息错误定义
     USER_NOT_EXITS(20001,"用户不存在"),
-    USER_LOGIN_FAIL(20002,"用户手机号或者密码不存在")
-    ;
+    USER_LOGIN_FAIL(20002,"用户手机号或者密码不存在"),
+    USER_NOT_LOGIN(20003,"用户还未登陆"),
+    STOCK_NOT_ENOUGH(30001,"库存不足" );
 
     EmBusinessError(int errCode, String errMsg) {
         this.errCode = errCode;
