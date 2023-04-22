@@ -7,6 +7,7 @@ import com.example.demo.service.PromoService;
 import org.joda.time.DateTime;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import javax.swing.text.DateFormatter;
 import java.math.BigDecimal;
@@ -16,6 +17,7 @@ import java.text.DateFormat;
  * @author Green写代码
  * @date 2023-04-21 14:42
  */
+@Service
 public class PromoServiceImpl implements PromoService {
 
     @Autowired

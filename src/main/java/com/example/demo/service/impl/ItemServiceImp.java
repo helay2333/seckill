@@ -14,6 +14,7 @@ import com.example.demo.validator.ValidataionResult;
 import com.example.demo.validator.ValidatorImpl;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
@@ -24,6 +25,7 @@ import java.util.stream.Collectors;
  * @author Green写代码
  * @date 2023-04-15 12:56
  */
+@Service
 public class ItemServiceImp implements ItemService {
     @Autowired
     private ValidatorImpl validator;

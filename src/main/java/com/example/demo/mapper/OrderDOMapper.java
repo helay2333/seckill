@@ -1,7 +1,9 @@
 package com.example.demo.mapper;
 
 import com.example.demo.entity.OrderDO;
+import org.apache.ibatis.annotations.Mapper;
 
+@Mapper
 public interface OrderDOMapper {
 
     int deleteByPrimaryKey(String id);
