@@ -105,7 +105,9 @@
 				},
 				xhrFields:{withCredentials:true},
 				success:function(data){
-					if(data.status == "success"){
+					console.log(data)
+					if(data.data != null && data.status == "success"){
+						
 						alert("注册成功");
 						window.location.href="./login.html";
 					}else{

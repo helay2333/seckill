@@ -14,6 +14,13 @@ public class CommonReturnType {
     private Object data;
     //定义一个通用的创建方法
     public static CommonReturnType create(Object result) {
+//        if(result == null) {
+//            CommonReturnType type = new CommonReturnType();
+//            type.setStatus("444");
+//
+//            type.setData(result);
+//            return type;
+//        }
         return CommonReturnType.create(result, "success");
     }
     public static CommonReturnType create(Object result, String status){

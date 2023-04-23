@@ -18,6 +18,7 @@ import javax.servlet.http.HttpServletRequest;
  */
 //下单相关
 @RestController("/order")
+@RequestMapping("/order")
 @CrossOrigin(originPatterns = {"*"},allowCredentials = "true")
 public class OrderController {
     private static final String CONTENT_TYPE_FORMED = "application/x-www-form-urlencoded";
