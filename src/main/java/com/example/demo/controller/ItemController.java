@@ -9,6 +9,7 @@ import com.example.demo.model.UserModel;
 import com.example.demo.response.CommonReturnType;
 import com.example.demo.service.ItemService;
 import com.example.demo.service.OrderService;
+import com.example.demo.service.impl.ItemServiceImp;
 import org.joda.time.format.DateTimeFormat;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,11 +26,12 @@ import java.util.stream.Collectors;
  */
 //商品相关
 @RestController("/item")
+@RequestMapping("/item")
 @CrossOrigin(originPatterns = {"*"},allowCredentials = "true")
 public class ItemController {
     private static final String CONTENT_TYPE_FORMED = "application/x-www-form-urlencoded";
     @Autowired
-    private ItemService itemService;
+    private ItemServiceImp itemService;
 
     //创建商品的controller
     @RequestMapping(value = "/create",method = {RequestMethod.POST},consumes={CONTENT_TYPE_FORMED})

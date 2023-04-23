@@ -92,7 +92,6 @@ public class UserController {
 
 
     //用户获取opt短信接口
-    @GetMapping("/set-cookie")
     @RequestMapping("/getotp")
     @ResponseBody
     public CommonReturnType getOpt(@RequestParam(value = "telephone")String phone, HttpServletResponse httpServletResponse){
